@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="FieldItemView">
+        <attr name="filed_title_text" format="string" />
+        <attr name="filed_delete_btn_show" format="boolean" />
+    </declare-styleable>
+
+</resources>
