@@ -96,10 +96,10 @@ public class AddAccountActivity extends Activity implements
 
 		String uniqueId = UUID.randomUUID().toString();
 		String accountName = mAccountFeildView.getUserInput();
-		List<Field> fieldList = new ArrayList<AccountModel.Field>();// TODO
 
 		accModel.uniqueId = uniqueId;
 		accModel.account = accountName;
+		accModel.fields = getFields();
 
 		boolean saveSuccess = AccountHelper.getInstance(this).addNewAccount(
 				accModel);
@@ -109,6 +109,24 @@ public class AddAccountActivity extends Activity implements
 			finish();
 		}
 
+	}
+
+	private List<Field> getFields() {
+		List<Field> fieldList = new ArrayList<AccountModel.Field>();
+		for (int i = 0; i < mFieldContainer.getChildCount(); i++) {
+			View child = mFieldContainer.getChildAt(i);
+			if (child instanceof FieldItemView) {
+				Field field = new Field();
+				FieldItemView fv = (FieldItemView) child;
+				if (fv.isShowing() && !TextUtils.isEmpty(fv.getFieldTitle())
+						&& !TextUtils.isEmpty(fv.getUserInput())) {
+					field.title = fv.getFieldTitle();
+					field.content = fv.getUserInput().trim();
+					fieldList.add(field);
+				}
+			}
+		}
+		return fieldList;
 	}
 
 }

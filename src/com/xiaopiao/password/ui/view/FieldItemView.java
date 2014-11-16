@@ -60,14 +60,22 @@ public class FieldItemView extends RelativeLayout implements OnClickListener {
 	 * 获取用户输入
 	 */
 	public String getUserInput() {
-		return mInputText.getEditableText().toString();
+		if (mInputText.getText() != null) {
+			return mInputText.getText().toString();
+		} else {
+			return "";
+		}
 	}
 
 	/*
 	 * 获取该字段标题
 	 */
 	public String getFieldTitle() {
-		return mFieldTitle.getEditableText().toString();
+		if (mFieldTitle.getText() != null) {
+			return mFieldTitle.getText().toString();
+		} else {
+			return "";
+		}
 	}
 
 	/**
@@ -82,6 +90,15 @@ public class FieldItemView extends RelativeLayout implements OnClickListener {
 	 */
 	public void setShowDelBtn(boolean showDel) {
 		mDeleteBtn.setVisibility(showDel ? View.VISIBLE : View.GONE);
+	}
+
+	/**
+	 * 空间是否没有被隐藏
+	 * 
+	 * @return
+	 */
+	public boolean isShowing() {
+		return getVisibility() == View.VISIBLE;
 	}
 
 	@Override
