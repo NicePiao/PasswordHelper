@@ -60,6 +60,27 @@ public class AccountTable {
 	}
 
 	/**
+	 * 获取单个账户
+	 * 
+	 * @return bean or null;
+	 */
+	public static Bean getAccount(SQLiteDatabase database, String uuid) {
+		Bean bean = null;
+		String selection = Columns.ID + "= ?";
+		String[] selectionArgs = new String[] { uuid };
+		Cursor cursor = database.query(TB_NAME, null, selection, selectionArgs,
+				null, null, null);
+		if (cursor != null && cursor.moveToFirst()) {
+			bean = new AccountTable.Bean();
+			bean.id = cursor.getString(cursor.getColumnIndex(Columns.ID));
+			bean.account = cursor.getString(cursor
+					.getColumnIndex(Columns.ACCOUNT));
+		}
+		cursor.close();
+		return bean;
+	}
+
+	/**
 	 * 账户表映射数据
 	 */
 	public static class Bean {

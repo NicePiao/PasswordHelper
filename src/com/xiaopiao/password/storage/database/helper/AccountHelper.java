@@ -90,4 +90,30 @@ public class AccountHelper {
 		return accountModels;
 	}
 
+	/**
+	 * 获取指定账户信息
+	 * 
+	 * @return {@link AccountModel} or null
+	 */
+	public AccountModel getAccount(Context context, String uuid) {
+		AccountModel accountModel = null;
+		SQLiteDatabase db = DbHelper.getInstance(mContext)
+				.getWritableDatabase();
+		AccountTable.Bean accBean = AccountTable.getAccount(db, uuid);
+		if (accBean != null) {
+			accountModel = new AccountModel();
+			accountModel.uniqueId = accBean.id;
+			accountModel.account = accBean.account;
+			List<FieldTable.Bean> fieldBeans = FieldTable.getAccountFields(db,
+					accBean.id);
+			for (FieldTable.Bean fieldBean : fieldBeans) {
+				AccountModel.Field field = new AccountModel.Field();
+				field.title = fieldBean.title;
+				field.content = fieldBean.content;
+				accountModel.fields.add(field);
+			}
+		}
+		return accountModel;
+	}
+
 }

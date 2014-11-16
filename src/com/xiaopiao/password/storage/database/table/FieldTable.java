@@ -53,8 +53,8 @@ public class FieldTable {
 	public static List<Bean> getAccountFields(SQLiteDatabase database,
 			String refId) {
 		List<Bean> allFields = new ArrayList<Bean>();
-		String selection = "? = ?";
-		String[] selectionArgs = new String[] { Columns.REFID, refId };
+		String selection = Columns.REFID + "= ?";
+		String[] selectionArgs = new String[] { refId };
 		Cursor cursor = database.query(TB_NAME, null, selection, selectionArgs,
 				null, null, null);
 		if (cursor != null && cursor.moveToFirst()) {

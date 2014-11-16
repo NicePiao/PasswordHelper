@@ -62,6 +62,19 @@ public class AccountAdapter extends BaseAdapter {
 		return convertView;
 	}
 
+	/**
+	 * 获取指定位置的数据
+	 * 
+	 * @param position
+	 * @return AccountModel or null
+	 */
+	public AccountModel getData(int position) {
+		if (mAccounts != null && position >= 0 && position < mAccounts.size()) {
+			return mAccounts.get(position);
+		}
+		return null;
+	}
+
 	static class Holder {
 		TextView accountName;
 	}

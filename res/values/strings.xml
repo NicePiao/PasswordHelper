@@ -4,5 +4,6 @@
     <string name="app_name">Password</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="no_content">抱歉，没有内容</string>
 
 </resources>
