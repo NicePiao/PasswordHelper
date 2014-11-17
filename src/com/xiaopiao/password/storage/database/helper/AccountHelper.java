@@ -7,6 +7,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.xiaopiao.password.model.AccountModel;
 import com.xiaopiao.password.model.AccountModel.Field;
@@ -139,25 +140,24 @@ public class AccountHelper {
 		List<String> fieldContents = new ArrayList<String>();
 		for (int i = 0; i < allBeans.size(); i++) {
 			Bean bean = allBeans.get(i);
-			boolean toPack = fieldTitle.equals(bean.title);
-			if (i == 0) {
-				toPack = false;
-			}
-			if (i == allBeans.size() - 1) {
-				toPack = true;
+			Log.d("qcw", bean.title + "  " + bean.content);
+			fieldTitle = bean.title;
+			fieldContents.add(bean.content);
+
+			String nextTitle = "";
+			if (i + 1 < allBeans.size()) {
+				nextTitle = allBeans.get(i + 1).title;
 			}
 
-			if (toPack) {
-				fieldTitle = bean.title;
-				fieldContents.add(bean.content);
+			if (!fieldTitle.equals(nextTitle)) {
 				titleList.add(fieldTitle);
 				contentMap.put(fieldTitle, fieldContents);
 				fieldContents = new ArrayList<String>();
 			}
-
-			fieldTitle = bean.title;
-			fieldContents.add(bean.content);
 		}
+
+		Log.d("qcw", titleList.toString());
+		Log.d("qcw", contentMap.toString());
 
 		return sugList;
 	}

@@ -50,12 +50,26 @@ public class AddAccountActivity extends Activity implements
 	private List<String> mFieldSugList = new ArrayList<String>();
 	private Map<String, List<String>> mContentSugMap = new HashMap<String, List<String>>();
 
+	private boolean mIsResume = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.password_add_layout);
 		initParam();
 		initView();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mIsResume = true;
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mIsResume = false;
 	}
 
 	private void initParam() {
@@ -82,7 +96,18 @@ public class AddAccountActivity extends Activity implements
 		List<Object> sugList = AccountHelper.getInstance(this).getSugList(this);
 		mFieldSugList = (List<String>) sugList.get(0);
 		mContentSugMap = (Map<String, List<String>>) sugList.get(1);
-		// todo 添加默认值
+		//添加默认值
+		List<String> defTitles = new ArrayList<String>();
+		defTitles.add("标题");
+		defTitles.add("账户");
+		defTitles.add("密码");
+		defTitles.add("邮箱");
+		defTitles.add("描述");
+		for (String title : defTitles) {
+			if (!mFieldSugList.contains(title)) {
+				mFieldSugList.add(title);
+			}
+		}
 	}
 
 	private void initView() {
@@ -236,9 +261,12 @@ public class AddAccountActivity extends Activity implements
 	 * 
 	 */
 	public List<String> getSugList(FieldItemView view, int pos) {
+		List<String> emptySugs = new ArrayList<String>();
 		if (pos == FieldItemView.ITEM_TITLE) {
 			List<String> titleSugs = new ArrayList<String>();
-			Collections.copy(titleSugs, mFieldSugList);
+			for (String s : mFieldSugList) {
+				titleSugs.add(s);
+			}
 
 			for (int i = 0; i < mFieldContainer.getChildCount(); i++) {
 				FieldItemView fv = (FieldItemView) mFieldContainer
@@ -253,12 +281,20 @@ public class AddAccountActivity extends Activity implements
 
 				}
 			}
-			return titleSugs;
+			return titleSugs == null ? emptySugs : titleSugs;
 
 		} else if (pos == FieldItemView.ITEM_CONTENT) {
-			return mContentSugMap.get(view.getFieldTitle());
+			List<String> contentSugs = mContentSugMap.get(view.getFieldTitle());
+			return contentSugs == null ? emptySugs : contentSugs;
 		}
-		return new ArrayList<String>();
+		return emptySugs;
+	}
+
+	/**
+	 * 查看Activity是否已经展示
+	 */
+	public boolean isResume() {
+		return mIsResume;
 	}
 
 }

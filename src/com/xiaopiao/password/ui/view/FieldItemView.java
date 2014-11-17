@@ -2,6 +2,7 @@ package com.xiaopiao.password.ui.view;
 
 import java.util.List;
 
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.xiaopiao.password.ui.AddAccountActivity;
  * @author qinchaowei
  * 
  */
+// todo 优化第一次进入时的建议词弹出
 public class FieldItemView extends RelativeLayout implements OnClickListener {
 
 	public static final int ITEM_TITLE = 0;
@@ -66,45 +68,80 @@ public class FieldItemView extends RelativeLayout implements OnClickListener {
 
 	private void setAutoCompleteText() {
 		mFieldTitle.setThreshold(1);
-		mFieldTitle.setCompletionHint(getContext().getString(R.string.history));
+		// mFieldTitle.setCompletionHint(getContext().getString(R.string.history));
+		mFieldTitle.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// if (TextUtils.isEmpty(getFieldTitle())) {
+				// showTitleSug(v);
+				// }
+
+			}
+		});
 		mFieldTitle.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-
-				if (hasFocus) {
-					List<String> sugs = mAccAddActi.getSugList(
-							FieldItemView.this, ITEM_TITLE);
-					if (!sugs.isEmpty()) {
-						ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-								getContext(), R.layout.sug_text_item, sugs);
-						mFieldTitle.setAdapter(adapter);
-						AutoCompleteTextView view = (AutoCompleteTextView) v;
-						view.showDropDown();
-					}
-
+				if (hasFocus && mAccAddActi.isResume()) {
+					showTitleSug(v);
 				}
+
 			}
 		});
 
 		mInputText.setThreshold(1);
-		mInputText.setCompletionHint(getContext().getString(R.string.history));
+		// mInputText.setCompletionHint(getContext().getString(R.string.history));
+		mInputText.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// if (TextUtils.isEmpty(getUserInput())) {
+				// showContentSug(v);
+				// }
+			}
+		});
+
 		mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				if (hasFocus) {
-					List<String> sugs = mAccAddActi.getSugList(
-							FieldItemView.this, ITEM_CONTENT);
-					if (!sugs.isEmpty()) {
-						ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-								getContext(), R.layout.sug_text_item, sugs);
-						mInputText.setAdapter(adapter);
-						AutoCompleteTextView view = (AutoCompleteTextView) v;
-						view.showDropDown();
-					}
-
+				if (hasFocus && mAccAddActi.isResume()) {
+					showContentSug(v);
 				}
 			}
 		});
+	}
+
+	private void showTitleSug(View view) {
+		AutoCompleteTextView autoView = ((AutoCompleteTextView) view);
+		if (autoView.isPopupShowing()) {
+			return;
+		}
+
+		List<String> sugs = mAccAddActi.getSugList(FieldItemView.this,
+				ITEM_TITLE);
+		if (!sugs.isEmpty()) {
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					getContext(), R.layout.sug_text_item, sugs);
+			mFieldTitle.setAdapter(adapter);
+
+			autoView.showDropDown();
+		}
+	}
+
+	private void showContentSug(View view) {
+		AutoCompleteTextView autoView = ((AutoCompleteTextView) view);
+		if (autoView.isPopupShowing()) {
+			return;
+		}
+
+		List<String> sugs = mAccAddActi.getSugList(FieldItemView.this,
+				ITEM_CONTENT);
+		if (!sugs.isEmpty()) {
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					getContext(), R.layout.sug_text_item, sugs);
+			mInputText.setAdapter(adapter);
+			autoView.showDropDown();
+		}
 	}
 
 	/**
