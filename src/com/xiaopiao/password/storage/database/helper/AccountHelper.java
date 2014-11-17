@@ -1,10 +1,11 @@
 package com.xiaopiao.password.storage.database.helper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
-import android.content.pm.FeatureInfo;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.xiaopiao.password.model.AccountModel;
@@ -12,6 +13,7 @@ import com.xiaopiao.password.model.AccountModel.Field;
 import com.xiaopiao.password.storage.database.DbHelper;
 import com.xiaopiao.password.storage.database.table.AccountTable;
 import com.xiaopiao.password.storage.database.table.FieldTable;
+import com.xiaopiao.password.storage.database.table.FieldTable.Bean;
 
 /**
  * 账户逻辑功能类
@@ -116,4 +118,47 @@ public class AccountHelper {
 		return accountModel;
 	}
 
+	/**
+	 * 获取建议词
+	 * 
+	 * @param context
+	 * @return 二元数组: 0->List<String> 1->Map<String,List<String>>
+	 */
+	public List<Object> getSugList(Context context) {
+		List<Object> sugList = new ArrayList<Object>();
+		List<String> titleList = new ArrayList<String>();
+		Map<String, List<String>> contentMap = new HashMap<String, List<String>>();
+		sugList.add(titleList);
+		sugList.add(contentMap);
+
+		SQLiteDatabase db = DbHelper.getInstance(mContext)
+				.getWritableDatabase();
+		List<Bean> allBeans = FieldTable.getAllBeans(db);
+
+		String fieldTitle = "";
+		List<String> fieldContents = new ArrayList<String>();
+		for (int i = 0; i < allBeans.size(); i++) {
+			Bean bean = allBeans.get(i);
+			boolean toPack = fieldTitle.equals(bean.title);
+			if (i == 0) {
+				toPack = false;
+			}
+			if (i == allBeans.size() - 1) {
+				toPack = true;
+			}
+
+			if (toPack) {
+				fieldTitle = bean.title;
+				fieldContents.add(bean.content);
+				titleList.add(fieldTitle);
+				contentMap.put(fieldTitle, fieldContents);
+				fieldContents = new ArrayList<String>();
+			}
+
+			fieldTitle = bean.title;
+			fieldContents.add(bean.content);
+		}
+
+		return sugList;
+	}
 }

@@ -1,15 +1,24 @@
 package com.xiaopiao.password.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.xiaopiao.password.R;
@@ -29,36 +38,73 @@ import com.xiaopiao.password.ui.view.FieldNameChooserDialog.DialogListener;
 public class AddAccountActivity extends Activity implements
 		android.view.View.OnClickListener {
 
+	private static final int MSG_SUG_ADD_EMPTY_FIELD_ITEM = 0;
+	private static final int MSG_SUG_ADD_SCROLL = 1;
+
+	private Handler mHandler;
+
+	private ScrollView mScrollView;
 	private LinearLayout mFieldContainer;
-	private FieldItemView mAccountFeildView;
-	private List<FieldItemView> mFieldViewList = new ArrayList<FieldItemView>();
-	private Button mAddFieldBtn;
 	private Button mSaveAccBtn;
+
+	private List<String> mFieldSugList = new ArrayList<String>();
+	private Map<String, List<String>> mContentSugMap = new HashMap<String, List<String>>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.password_add_layout);
+		initParam();
 		initView();
 	}
 
-	private void initView() {
-		mFieldContainer = (LinearLayout) findViewById(R.id.field_container);
-		mAccountFeildView = (FieldItemView) findViewById(R.id.account_filed);
-		mAddFieldBtn = (Button) findViewById(R.id.add_new_field_btn);
-		mSaveAccBtn = (Button) findViewById(R.id.save_account);
-		mAddFieldBtn.setOnClickListener(this);
-		mSaveAccBtn.setOnClickListener(this);
+	private void initParam() {
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case MSG_SUG_ADD_EMPTY_FIELD_ITEM:
+					addNewEmptyItemIfNeed();
+					break;
+				case MSG_SUG_ADD_SCROLL:
+					mScrollView.smoothScrollBy(0, 1000);
+					break;
+				default:
+					break;
+				}
+			}
 
+		};
+		initSugs();
+	}
+
+	private void initSugs() {
+		List<Object> sugList = AccountHelper.getInstance(this).getSugList(this);
+		mFieldSugList = (List<String>) sugList.get(0);
+		mContentSugMap = (Map<String, List<String>>) sugList.get(1);
+		// todo 添加默认值
+	}
+
+	private void initView() {
+		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
+		mFieldContainer = (LinearLayout) findViewById(R.id.field_container);
+		mSaveAccBtn = (Button) findViewById(R.id.save_account);
+		mSaveAccBtn.setOnClickListener(this);
+		setDefaultFieldItems();
+	}
+
+	private void setDefaultFieldItems() {
+		addNewFieldItem("标题");
+		addNewFieldItem("账户");
 		addNewFieldItem("密码");
+		addNewFieldItem("");
+		updateDelBtns();
+		getFieldItem(0).requestFocusView(1);
 	}
 
 	@Override
 	public void onClick(View arg0) {
 		switch (arg0.getId()) {
-		case R.id.add_new_field_btn:
-			showFieldNameChooseDialog();
-			break;
 		case R.id.save_account:
 			saveAccount();
 			break;
@@ -81,24 +127,62 @@ public class AddAccountActivity extends Activity implements
 	}
 
 	private void addNewFieldItem(String filedName) {
-		if (TextUtils.isEmpty(filedName)) {
-			return;
-		}
-
-		FieldItemView item = new FieldItemView(this);
+		// if (TextUtils.isEmpty(filedName)) {
+		// return;
+		// }
+		final FieldItemView item = new FieldItemView(this);
 		item.setTitle(filedName);
 		item.setShowDelBtn(true);
+		item.setTextWatcher(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+				mHandler.removeMessages(MSG_SUG_ADD_EMPTY_FIELD_ITEM);
+				mHandler.sendEmptyMessageDelayed(MSG_SUG_ADD_EMPTY_FIELD_ITEM,
+						1000);
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+
 		mFieldContainer.addView(item);
+	}
+
+	private void addNewEmptyItemIfNeed() {
+		FieldItemView fv = getLastVisiableFieldItem();
+		if (fv == null || !TextUtils.isEmpty(fv.getUserInput())) {
+			addNewFieldItem("");
+			updateDelBtns();
+			mHandler.sendEmptyMessageDelayed(MSG_SUG_ADD_SCROLL, 200);
+		}
+	}
+
+	private void updateDelBtns() {
+		for (int i = 0; i < mFieldContainer.getChildCount(); i++) {
+			FieldItemView fv = (FieldItemView) mFieldContainer.getChildAt(i);
+			fv.setShowDelBtn(true);
+		}
+		FieldItemView fv = getLastVisiableFieldItem();
+		if (fv != null) {
+			fv.setShowDelBtn(false);
+		}
 	}
 
 	private void saveAccount() {
 		AccountModel accModel = new AccountModel();
-
 		String uniqueId = UUID.randomUUID().toString();
-		String accountName = mAccountFeildView.getUserInput();
 
 		accModel.uniqueId = uniqueId;
-		accModel.account = accountName;
+		accModel.account = uniqueId;
 		accModel.fields = getFields();
 
 		boolean saveSuccess = AccountHelper.getInstance(this).addNewAccount(
@@ -109,6 +193,24 @@ public class AddAccountActivity extends Activity implements
 			finish();
 		}
 
+	}
+
+	private FieldItemView getLastVisiableFieldItem() {
+		for (int i = mFieldContainer.getChildCount() - 1; i >= 0; i--) {
+			FieldItemView fv = (FieldItemView) mFieldContainer.getChildAt(i);
+			if (fv.isShowing()) {
+				return fv;
+			}
+		}
+		return null;
+	}
+
+	private FieldItemView getFieldItem(int pos) {
+		if (pos < mFieldContainer.getChildCount()) {
+			return (FieldItemView) mFieldContainer.getChildAt(pos);
+		} else {
+			return null;
+		}
 	}
 
 	private List<Field> getFields() {
@@ -127,6 +229,36 @@ public class AddAccountActivity extends Activity implements
 			}
 		}
 		return fieldList;
+	}
+
+	/**
+	 * 获取建议列表词语
+	 * 
+	 */
+	public List<String> getSugList(FieldItemView view, int pos) {
+		if (pos == FieldItemView.ITEM_TITLE) {
+			List<String> titleSugs = new ArrayList<String>();
+			Collections.copy(titleSugs, mFieldSugList);
+
+			for (int i = 0; i < mFieldContainer.getChildCount(); i++) {
+				FieldItemView fv = (FieldItemView) mFieldContainer
+						.getChildAt(i);
+				if (fv == view) {
+					break;
+				} else {
+					if (fv.isShowing()
+							&& !TextUtils.isEmpty(fv.getFieldTitle())) {
+						titleSugs.remove(fv.getFieldTitle());
+					}
+
+				}
+			}
+			return titleSugs;
+
+		} else if (pos == FieldItemView.ITEM_CONTENT) {
+			return mContentSugMap.get(view.getFieldTitle());
+		}
+		return new ArrayList<String>();
 	}
 
 }

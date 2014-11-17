@@ -73,4 +73,29 @@ public class FieldTable {
 		return allFields;
 	}
 
+	/**
+	 * 获取所有字段内容
+	 * 
+	 */
+	public static List<Bean> getAllBeans(SQLiteDatabase database) {
+		List<Bean> allFields = new ArrayList<Bean>();
+		String orderBy = Columns.TITLE + " asc";
+		Cursor cursor = database.query(TB_NAME, null, null, null, null, null,
+				orderBy);
+		if (cursor != null && cursor.moveToFirst()) {
+			do {
+				Bean bean = new Bean();
+				bean.refid = cursor.getString(cursor
+						.getColumnIndex(Columns.REFID));
+				bean.title = cursor.getString(cursor
+						.getColumnIndex(Columns.TITLE));
+				bean.content = cursor.getString(cursor
+						.getColumnIndex(Columns.CONTENT));
+				allFields.add(bean);
+			} while (cursor.moveToNext());
+		}
+		cursor.close();
+		return allFields;
+	}
+
 }
