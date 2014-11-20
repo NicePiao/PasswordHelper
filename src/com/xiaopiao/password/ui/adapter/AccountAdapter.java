@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.xiaopiao.password.R;
 import com.xiaopiao.password.model.AccountModel;
+import com.xiaopiao.password.model.AccountModel.Field;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -50,15 +51,38 @@ public class AccountAdapter extends BaseAdapter {
 			holder = new Holder();
 			convertView = LayoutInflater.from(mContext).inflate(
 					R.layout.account_list_item, parent, false);
-			holder.accountName = (TextView) convertView
-					.findViewById(R.id.account_name);
+			holder.text1 = (TextView) convertView.findViewById(R.id.text1);
+			holder.text2 = (TextView) convertView.findViewById(R.id.text2);
+			holder.text3 = (TextView) convertView.findViewById(R.id.text3);
 			convertView.setTag(holder);
 		} else {
 			holder = (Holder) convertView.getTag();
 		}
 
 		AccountModel acc = mAccounts.get(position);
-		holder.accountName.setText(acc.account);
+		// holder.accountName.setText(acc.account);
+		List<Field> fields = acc.fields;
+		if (fields.size() > 0) {
+			holder.text1.setText(fields.get(0).title + "    "
+					+ fields.get(0).content);
+		} else {
+			holder.text1.setText("");
+		}
+
+		if (fields.size() > 1) {
+			holder.text2.setText(fields.get(1).title + "    "
+					+ fields.get(1).content);
+		} else {
+			holder.text2.setText("");
+		}
+
+		if (fields.size() > 2) {
+			holder.text3.setText(fields.get(2).title + "    "
+					+ fields.get(2).content);
+		} else {
+			holder.text3.setText("");
+		}
+
 		return convertView;
 	}
 
@@ -76,6 +100,8 @@ public class AccountAdapter extends BaseAdapter {
 	}
 
 	static class Holder {
-		TextView accountName;
+		TextView text1;
+		TextView text2;
+		TextView text3;
 	}
 }
