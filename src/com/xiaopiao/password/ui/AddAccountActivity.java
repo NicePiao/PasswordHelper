@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import android.app.Activity;
+import android.content.pm.FeatureInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -93,10 +95,10 @@ public class AddAccountActivity extends Activity implements
 	}
 
 	private void initSugs() {
-		List<Object> sugList = AccountHelper.getInstance(this).getSugList(this);
+		List<Object> sugList = AccountHelper.getInstance(this).getSugList();
 		mFieldSugList = (List<String>) sugList.get(0);
 		mContentSugMap = (Map<String, List<String>>) sugList.get(1);
-		//添加默认值
+		// 添加默认值
 		List<String> defTitles = new ArrayList<String>();
 		defTitles.add("标题");
 		defTitles.add("账户");
@@ -205,10 +207,17 @@ public class AddAccountActivity extends Activity implements
 	private void saveAccount() {
 		AccountModel accModel = new AccountModel();
 		String uniqueId = UUID.randomUUID().toString();
+		List<Field> fileds = getFields();
+
+		if (fileds == null || fileds.isEmpty()) {
+			Toast.makeText(this, "空空如也", Toast.LENGTH_SHORT).show();
+			finish();
+			return;
+		}
 
 		accModel.uniqueId = uniqueId;
 		accModel.account = uniqueId;
-		accModel.fields = getFields();
+		accModel.fields = fileds;
 
 		boolean saveSuccess = AccountHelper.getInstance(this).addNewAccount(
 				accModel);
@@ -261,7 +270,7 @@ public class AddAccountActivity extends Activity implements
 	 * 
 	 */
 	public List<String> getSugList(FieldItemView view, int pos) {
-		List<String> emptySugs = new ArrayList<String>();
+		List<String> sugs = new ArrayList<String>();
 		if (pos == FieldItemView.ITEM_TITLE) {
 			List<String> titleSugs = new ArrayList<String>();
 			for (String s : mFieldSugList) {
@@ -281,13 +290,25 @@ public class AddAccountActivity extends Activity implements
 
 				}
 			}
-			return titleSugs == null ? emptySugs : titleSugs;
+			if (titleSugs != null) {
+				sugs = titleSugs;
+			}
 
 		} else if (pos == FieldItemView.ITEM_CONTENT) {
 			List<String> contentSugs = mContentSugMap.get(view.getFieldTitle());
-			return contentSugs == null ? emptySugs : contentSugs;
+			if (contentSugs != null) {
+				sugs = contentSugs;
+			}
 		}
-		return emptySugs;
+
+		// 去重
+		TreeSet<String> set = new TreeSet<String>();
+		set.addAll(sugs);
+		String[] arr = new String[set.size()];
+		set.toArray(arr);
+		sugs = Arrays.asList(arr);
+
+		return sugs;
 	}
 
 	/**

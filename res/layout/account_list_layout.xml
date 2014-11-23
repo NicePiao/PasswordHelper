@@ -11,12 +11,21 @@
         android:padding="10dp" >
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:text="账户列表"
             android:textColor="@android:color/white"
             android:textSize="20dp" />
+
+        <ImageButton
+            android:id="@+id/synchronize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/title"
+            android:background="@android:color/transparent"
+            android:src="@drawable/synchronize" />
 
         <Button
             android:id="@+id/add_account"

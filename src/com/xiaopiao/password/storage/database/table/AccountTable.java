@@ -81,6 +81,16 @@ public class AccountTable {
 	}
 
 	/**
+	 * 删除账户
+	 */
+	public static boolean delAccount(SQLiteDatabase database, String uuid) {
+		String whereClause = Columns.ID + "= ?";
+		String[] whereArgs = new String[] { uuid };
+		int result = database.delete(TB_NAME, whereClause, whereArgs);
+		return result > 0;
+	}
+
+	/**
 	 * 账户表映射数据
 	 */
 	public static class Bean {

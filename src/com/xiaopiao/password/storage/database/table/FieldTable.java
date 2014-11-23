@@ -98,4 +98,14 @@ public class FieldTable {
 		return allFields;
 	}
 
+	/**
+	 * É¾³ý×Ö¶Î
+	 */
+	public static boolean delFields(SQLiteDatabase database, String uuid) {
+		String whereClause = Columns.REFID + "= ?";
+		String[] whereArgs = new String[] { uuid };
+		int result = database.delete(TB_NAME, whereClause, whereArgs);
+		return result > 0;
+	}
+
 }

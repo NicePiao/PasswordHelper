@@ -22,7 +22,7 @@ public class ContentDialog extends Dialog {
 
 	public ContentDialog(Context context, String uuid) {
 		super(context);
-		mData = AccountHelper.getInstance(context).getAccount(context, uuid);
+		mData = AccountHelper.getInstance(context).getAccount(uuid);
 	}
 
 	@Override

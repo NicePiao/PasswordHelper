@@ -71,7 +71,7 @@ public class AccountHelper {
 	/**
 	 * 获取所有的账户信息
 	 */
-	public List<AccountModel> getAllAccounts(Context context) {
+	public List<AccountModel> getAllAccounts() {
 		List<AccountModel> accountModels = new ArrayList<AccountModel>();
 		SQLiteDatabase db = DbHelper.getInstance(mContext)
 				.getWritableDatabase();
@@ -98,7 +98,7 @@ public class AccountHelper {
 	 * 
 	 * @return {@link AccountModel} or null
 	 */
-	public AccountModel getAccount(Context context, String uuid) {
+	public AccountModel getAccount(String uuid) {
 		AccountModel accountModel = null;
 		SQLiteDatabase db = DbHelper.getInstance(mContext)
 				.getWritableDatabase();
@@ -125,7 +125,7 @@ public class AccountHelper {
 	 * @param context
 	 * @return 二元数组: 0->List<String> 1->Map<String,List<String>>
 	 */
-	public List<Object> getSugList(Context context) {
+	public List<Object> getSugList() {
 		List<Object> sugList = new ArrayList<Object>();
 		List<String> titleList = new ArrayList<String>();
 		Map<String, List<String>> contentMap = new HashMap<String, List<String>>();
@@ -160,5 +160,20 @@ public class AccountHelper {
 		Log.d("qcw", contentMap.toString());
 
 		return sugList;
+	}
+
+	/**
+	 * 删除一个账户
+	 */
+	public boolean delAccount(String uuid) {
+		SQLiteDatabase db = DbHelper.getInstance(mContext)
+				.getWritableDatabase();
+		boolean delInAccTable = AccountTable.delAccount(db, uuid);
+		if (delInAccTable) {
+			FieldTable.delFields(db, uuid);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
